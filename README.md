@@ -1,2 +1,2 @@
-# Q-clock-AI
+# Q-clockspeed-AI
 None
