@@ -33,9 +33,9 @@
       ],
       "js": [
         "utils/storage.js",
-        "content/platform-detector.js",
+        "content/platform-adapter.js",
         "content/state-signal.js",
-        "content/qwork-detector.js",
+        "content/chat-observer.js",
         "content/reasoning-boost.js",
         "content/sandbox.js",
         "content/ui-injector.js",

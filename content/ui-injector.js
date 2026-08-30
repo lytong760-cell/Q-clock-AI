@@ -1,7 +1,7 @@
 const UIInjector = (() => {
   let container = null;
   let statusIndicator = null;
-  let mode = 'idle'; // idle | boosting | error | disabled
+  let mode = 'idle';
   let qworkButton = null;
   let qworkActive = false;
 
@@ -25,7 +25,7 @@ const UIInjector = (() => {
 
   function injectChatBarButton() {
     if (qworkButton) return;
-    const inputArea = PlatformDetector.findElement(Content.getPlatformId(), 'inputArea');
+    const inputArea = PlatformAdapter.findElement(Content.getPlatformId(), 'inputArea');
     if (!inputArea) {
       setTimeout(injectChatBarButton, 2000);
       return;
@@ -38,9 +38,10 @@ const UIInjector = (() => {
     qworkButton.title = 'Toggle Q-clock Qwork Mode';
     qworkButton.addEventListener('click', toggleQwork);
 
-    if (inputArea.parentNode) {
-      inputArea.parentNode.style.position = inputArea.parentNode.style.position || 'relative';
-      inputArea.parentNode.insertBefore(qworkButton, inputArea);
+    const form = inputArea.closest('form') || inputArea.parentNode;
+    if (form) {
+      form.style.position = form.style.position || 'relative';
+      form.appendChild(qworkButton);
     }
   }
 
@@ -57,12 +58,11 @@ const UIInjector = (() => {
       qworkButton.classList.toggle('qclock-qwork-active', qworkActive);
     }
     setQworkStatus(qworkActive ? 'active' : 'inactive');
+    ChatObserver.setQworkActive(qworkActive);
     if (qworkActive) {
       showNotification('Qwork mode activated');
-      QworkDetector.activate(Content.getPlatformId());
     } else {
       showNotification('Qwork mode deactivated');
-      QworkDetector.deactivate();
     }
   }
 
@@ -329,26 +329,26 @@ const UIInjector = (() => {
   }
 
   function triggerBoost() {
-    if (!UIInjector.isQworkActive()) {
+    if (!ChatObserver.isQworkActive()) {
       showNotification('Enable Qwork mode first');
       return;
     }
-    
-    const lastMessage = ReasoningBoost.findLastTruncatedMessage();
+
+    const lastMessage = ChatObserver.findLastTruncatedMessage();
     if (!lastMessage) {
       showNotification('No truncated response found');
       setStatus('idle');
       return;
     }
-    
+
     setStatus('boosting');
     StateSignal.setBoostActive(true);
     showNotification('Requesting continuation...');
-    
+
     const text = lastMessage.innerText || lastMessage.textContent || '';
-    const prompt = ReasoningBoost.buildContinuationPrompt(lastMessage, text, ReasoningBoost.generateContinuationId ? 'manual-' + Date.now() : 'manual');
-    ReasoningBoost.sendContinuation(prompt);
-    
+    const prompt = ChatObserver.buildContinuationPrompt(text, ChatObserver.generateContinuationId());
+    ChatObserver.sendContinuation(prompt);
+
     setTimeout(() => {
       setStatus('idle');
       StateSignal.setBoostActive(false);
@@ -394,9 +394,8 @@ const UIInjector = (() => {
   function sendErrorToAI(text) {
     const input = document.querySelector('textarea, div[contenteditable="true"]');
     if (input) {
-      const escaped = text.replace(/"/g, '\\"').replace(/\n/g, '\\n');
       const errorMsg = `I got this error when running the code. Please fix it:\n\`\`\`\n${text}\n\`\`\``;
-      if (input.tagName.toLowerCase() === 'textarea') {
+      if (input.tagName && input.tagName.toLowerCase() === 'textarea') {
         input.value = errorMsg;
         input.dispatchEvent(new Event('input', { bubbles: true }));
       } else {

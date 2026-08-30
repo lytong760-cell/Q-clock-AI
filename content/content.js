@@ -14,7 +14,7 @@ const Content = (() => {
       return;
     }
 
-    platform = PlatformDetector.detect();
+    platform = PlatformAdapter.detect();
     if (!platform) {
       console.log('[Q-clock-AI] No supported platform detected');
       return;
@@ -22,14 +22,11 @@ const Content = (() => {
 
     console.log(`[Q-clock-AI] Platform detected: ${platform.name}`);
     NativeBridge.init();
-    ReasoningBoost.init(platform.id);
-    QworkDetector.init();
     StateSignal.init();
     StateSignal.observeForUI();
+    ChatObserver.init(platform);
     UIInjector.inject(platform);
-    observeChat();
     setupMessageListener();
-    QworkDetector.observeInputChanges();
   }
 
   function getPlatformId() {
@@ -37,7 +34,7 @@ const Content = (() => {
   }
 
   function observeChat() {
-    const chatContainer = PlatformDetector.findElement(platform.id, 'chatContainer');
+    const chatContainer = PlatformAdapter.findElement(platform.id, 'chatContainer');
     if (!chatContainer) {
       setTimeout(observeChat, 2000);
       return;
@@ -48,21 +45,13 @@ const Content = (() => {
     }
 
     observer = new MutationObserver((mutations) => {
-      ReasoningBoost.observe(mutations);
-      observeNewMessages();
+      ChatObserver.observe(mutations);
     });
 
     observer.observe(chatContainer, {
       childList: true,
       subtree: true
     });
-
-    observeNewMessages();
-  }
-
-  function observeNewMessages() {
-    const messages = document.querySelectorAll('[data-message-author-role], article, .font-claude-message');
-    messages.forEach(msg => ReasoningBoost.processResponse(msg));
   }
 
   function setupMessageListener() {
@@ -76,8 +65,23 @@ const Content = (() => {
       if (message.type === 'TASK_TRIGGERED') {
         console.log('[Q-clock-AI] Task triggered:', message.payload);
       }
+      if (message.type === 'EXECUTE_SCHEDULED_TASK') {
+        handleScheduledTask(message.payload);
+      }
       sendResponse({ received: true });
     });
+  }
+
+  function handleScheduledTask(payload) {
+    if (payload && payload.code) {
+      StateSignal.setStatus('processing');
+      StateSignal.setSandboxActive(true);
+      Sandbox.runJs(payload.code).then(result => {
+        console.log('[Q-clock-AI] Scheduled task result:', result);
+        StateSignal.setStatus('idle');
+        StateSignal.setSandboxActive(false);
+      });
+    }
   }
 
   function handleInternalMessage(message) {
