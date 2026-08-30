@@ -1,82 +1,81 @@
 const QworkDetector = (() => {
   let active = false;
-  let startTime = null;
-  let usageCount = 0;
-  let lastPlatform = null;
+  let platform = null;
+  let observer = null;
 
   function init() {
+    if (active) return;
     active = false;
-    startTime = null;
-    usageCount = 0;
-    lastPlatform = null;
   }
 
-  function activate(platform) {
+  function activate(platformId) {
+    if (active) return;
     active = true;
-    startTime = startTime || Date.now();
-    lastPlatform = platform;
-    usageCount++;
-    logUsage('activated');
+    platform = platformId;
+    observeInputChanges();
   }
 
   function deactivate() {
-    if (active) {
-      logUsage('deactivated');
-    }
     active = false;
+    stopObserving();
   }
 
   function isActive() {
     return active;
   }
 
-  function getStats() {
-    return {
-      active,
-      startTime,
-      usageCount,
-      lastPlatform,
-      duration: startTime ? Date.now() - startTime : 0
-    };
-  }
-
-  function logUsage(action) {
-    const stats = getStats();
-    console.log(`[Q-clock-AI] Qwork ${action}:`, {
-      platform: stats.lastPlatform,
-      usageCount: stats.usageCount,
-      duration: stats.duration + 'ms'
-    });
-  }
-
   function observeInputChanges() {
-    const observer = new MutationObserver((mutations) => {
+    observeTruncation();
+  }
+
+  function observeTruncation() {
+    if (!active) return;
+    const chatContainer = PlatformDetector.findElement(platform, 'chatContainer');
+    if (!chatContainer) {
+      setTimeout(observeTruncation, 2000);
+      return;
+    }
+
+    stopObserving();
+    observer = new MutationObserver((mutations) => {
       if (!active) return;
-      mutations.forEach(mutation => {
-        if (mutation.type === 'childList' || mutation.type === 'characterData') {
-          chrome.runtime.sendMessage({
-            type: 'QWORK_USAGE',
-            payload: {
-              platform: lastPlatform,
-              timestamp: new Date().toISOString(),
-              action: 'input_change'
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const messages = node.querySelectorAll ? node.querySelectorAll('[data-message-author-role="assistant"], [data-message-author-role="chatgpt"], article, .font-claude-message, [class*="message"]') : [];
+            if (messages.length === 0 && node.matches && node.matches('[data-message-author-role="assistant"], article, .font-claude-message, [class*="message"]')) {
+              processMessage(node);
             }
-          }).catch(() => {});
-        }
+            messages.forEach(processMessage);
+          }
+        });
       });
     });
 
-    const inputArea = document.querySelector('textarea, div[contenteditable="true"]');
-    if (inputArea) {
-      observer.observe(inputArea, {
-        childList: true,
-        subtree: true,
-        characterData: true
-      });
+    observer.observe(chatContainer, { childList: true, subtree: true });
+  }
+
+  function processMessage(node) {
+    if (!active) return;
+    
+    const isContinuation = ReasoningBoost.handleContinuationResponse(node);
+    if (isContinuation) return;
+    
+    const text = node.innerText || node.textContent || '';
+    if (text.length < 100) return;
+    if (ReasoningBoost.isTruncatedResponse(text)) {
+      ReasoningBoost.attemptContinuation(node, text);
     }
   }
 
-  return { init, activate, deactivate, isActive, getStats, observeInputChanges };
+  function stopObserving() {
+    if (observer) {
+      observer.disconnect();
+      observer = null;
+    }
+  }
+
+  return { init, activate, deactivate, isActive, observeInputChanges };
 })();
 
 if (typeof module !== 'undefined' && module.exports) {

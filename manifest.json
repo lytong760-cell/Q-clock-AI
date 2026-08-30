@@ -34,12 +34,12 @@
       "js": [
         "utils/storage.js",
         "content/platform-detector.js",
+        "content/state-signal.js",
+        "content/qwork-detector.js",
         "content/reasoning-boost.js",
         "content/sandbox.js",
         "content/ui-injector.js",
         "content/native-bridge.js",
-        "content/qwork-detector.js",
-        "content/ai-signal.js",
         "content/content.js"
       ],
       "css": ["styles/injected.css"],

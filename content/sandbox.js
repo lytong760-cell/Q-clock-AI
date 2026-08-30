@@ -15,8 +15,8 @@ const Sandbox = (() => {
   function runJs(code) {
     return new Promise((resolve) => {
       const frame = getIframe();
-      const logs = [];
       const startTime = performance.now();
+      let resolved = false;
 
       const script = frame.contentDocument.createElement('script');
       script.textContent = `
@@ -87,6 +87,8 @@ const Sandbox = (() => {
       const handler = (event) => {
         if (event.source === frame.contentWindow && event.data && event.data.type === 'qclock-sandbox-result') {
           window.removeEventListener('message', handler);
+          if (resolved) return;
+          resolved = true;
           const duration = performance.now() - startTime;
           if (event.data.error) {
             resolve({ success: false, logs: event.data.logs, error: event.data.error, duration });
@@ -101,7 +103,7 @@ const Sandbox = (() => {
 
       setTimeout(() => {
         window.removeEventListener('message', handler);
-        if (logs.length === 0 || !logs.some(l => l.type === 'complete')) {
+        if (!resolved) {
           resolve({ success: false, logs: [{ type: 'error', content: 'Sandbox execution timed out' }], error: 'Timeout' });
         }
       }, 10000);

@@ -64,9 +64,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse(data);
         break;
       }
-      case 'RUN_SANDBOX': {
-        const result = await executeSandbox(message.payload);
-        sendResponse(result);
+      case 'NATIVE_CREATE_FILE': {
+        sendResponse({ 
+          success: false, 
+          error: 'Native messaging host not configured. To enable file creation, set up a Chrome Native Messaging host manifest pointing to a local executable.' 
+        });
+        break;
+      }
+      case 'NATIVE_RUN_SCRIPT': {
+        sendResponse({ 
+          success: false, 
+          error: 'Native messaging host not configured. To enable script execution, set up a Chrome Native Messaging host manifest pointing to a local executable.' 
+        });
+        break;
+      }
+      case 'NATIVE_SCHEDULE_TASK': {
+        sendResponse({ 
+          success: false, 
+          error: 'Native messaging host not configured. To enable task scheduling, set up a Chrome Native Messaging host manifest pointing to a local executable.' 
+        });
         break;
       }
       case 'QWORK_USAGE': {
@@ -90,43 +106,3 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     }).catch(() => {});
   }
 });
-
-async function executeSandbox({ code, language }) {
-  try {
-    if (language === 'javascript' || language === 'js') {
-      const result = await runJsInSandbox(code);
-      return { success: true, output: result.output, error: result.error };
-    }
-    return { success: false, error: 'Unsupported language for sandbox' };
-  } catch (err) {
-    return { success: false, error: err.message };
-  }
-}
-
-function runJsInSandbox(code) {
-  return new Promise((resolve) => {
-    try {
-      const logs = [];
-      const originalLog = console.log;
-      const originalError = console.error;
-      const originalWarn = console.warn;
-      console.log = (...args) => logs.push({ type: 'log', args: args.map(a => JSON.stringify(a)) });
-      console.error = (...args) => logs.push({ type: 'error', args: args.map(a => JSON.stringify(a)) });
-      console.warn = (...args) => logs.push({ type: 'warn', args: args.map(a => JSON.stringify(a)) });
-      let result;
-      let error;
-      try {
-        const fn = new Function(code);
-        result = fn();
-      } catch (e) {
-        error = e.message;
-      }
-      console.log = originalLog;
-      console.error = originalError;
-      console.warn = originalWarn;
-      resolve({ output: logs, result, error });
-    } catch (e) {
-      resolve({ output: [], error: e.message });
-    }
-  });
-}

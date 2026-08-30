@@ -286,6 +286,12 @@
   box-shadow: 0 0 4px rgba(34, 197, 94, 0.5);
 }
 
+.qclock-status-indicator.qclock-processing {
+  background: #3b82f6;
+  box-shadow: 0 0 4px rgba(59, 130, 246, 0.5);
+  animation: qclock-pulse 1.5s infinite;
+}
+
 .qclock-status-indicator.qclock-boosting {
   background: #a855f7;
   box-shadow: 0 0 4px rgba(168, 85, 247, 0.5);

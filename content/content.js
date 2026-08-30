@@ -24,8 +24,8 @@ const Content = (() => {
     NativeBridge.init();
     ReasoningBoost.init(platform.id);
     QworkDetector.init();
-    AISignal.init();
-    AISignal.observeForAI();
+    StateSignal.init();
+    StateSignal.observeForUI();
     UIInjector.inject(platform);
     observeChat();
     setupMessageListener();
@@ -61,7 +61,7 @@ const Content = (() => {
   }
 
   function observeNewMessages() {
-    const messages = document.querySelectorAll('[data-message-author-role], .message, article, .font-claude-message, [class*="message"]');
+    const messages = document.querySelectorAll('[data-message-author-role], article, .font-claude-message');
     messages.forEach(msg => ReasoningBoost.processResponse(msg));
   }
 
@@ -99,7 +99,7 @@ const Content = (() => {
     init();
   }
 
-  return { init };
+  return { init, getPlatformId };
 })();
 
 if (typeof module !== 'undefined' && module.exports) {

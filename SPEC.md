@@ -72,13 +72,13 @@ Q-clock-AI có khả năng phát hiện khi AI đang bị giới hạn phản h�
 
 Các phương thức tăng tốc có thể bao gồm:
 
-- Ưu tiên xử lý cục bộ bằng tài nguyên máy tính của người dùng.
-- Tận dụng WebGPU để tăng tốc suy luận tại trình duyệt.
-- Kết hợp các mô hình hỗ trợ nhỏ để làm rõ, mở rộng hoặc hoàn thiện câu trả lời.
-- Định tuyến lại một số yêu cầu qua các kênh phù hợp hơn nếu được người dùng cấu hình.
-- Giữ ngữ cảnh hội thoại đầy đủ để AI không bị mất thông tin quan trọng.
+- Ưu tiên xử lý cục bộ bằng tài nguyên máy tính của người dùng. (Kế hoạch phát triển)
+- Tận dụng WebGPU để tăng tốc suy luận tại trình duyệt. (Kế hoạch phát triển)
+- Kết hợp các mô hình hỗ trợ nhỏ để làm rõ, mở rộng hoặc hoàn thiện câu trả lời. (Kế hoạch phát triển)
+- Định tuyến lại một số yêu cầu qua các kênh phù hợp hơn nếu được người dùng cấu hình. (Kế hoạch phát triển)
+- Giữ ngữ cảnh hội thoại đầy đủ để AI không bị mất thông tin quan trọng. (Kế hoạch phát triển)
 
-Mục tiêu là giúp AI trả lời sâu hơn, logic hơn và đầy đủ hơn so với trạng thái bị giới hạn mặc định trên web.
+Phiên bản hiện tại tập trung vào việc phát hiện phản hồi bị cắt ngắn và yêu cầu AI tiếp tục trả lời thông qua Qwork mode, giúp mở rộng câu trả lời mà không cần thay đổi mô hình AI gốc.
 
 ### 4.2. Sandbox AI để thử nghiệm trực tiếp
 
@@ -86,8 +86,8 @@ Q-clock-AI cung cấp môi trường sandbox cho phép AI hoặc người dùng 
 
 Sandbox có thể hỗ trợ:
 
-- Chạy mã JavaScript.
-- Chạy mã Python trong môi trường an toàn.
+- Chạy mã JavaScript trong iframe cách ly.
+- Chạy mã Python trong môi trường an toàn. (Kế hoạch phát triển, chưa triển khai trong phiên bản hiện tại)
 - Chạy các đoạn script ngắn.
 - Xem kết quả đầu ra.
 - Xem log lỗi.
@@ -184,7 +184,7 @@ Q-clock-AI cần tôn trọng giao diện gốc của website AI. Tiện ích ch
 
 ## 6. Hỗ trợ các nền tảng AI phổ biến
 
-Q-clock-AI hướng đến việc hỗ trợ khoảng 40 nền tảng AI phổ biến, bao gồm nhưng không giới hạn:
+Q-clock-AI hướng đến việc hỗ trợ nhiều nền tảng AI phổ biến. Phiên bản hiện tại hỗ trợ 9 nền tảng: ChatGPT, Claude, Gemini, Copilot, Perplexity, HuggingChat, Poe, OpenRouter và các liên kết chat.openai.com. Hệ thống nhận diện linh hoạt để có thể mở rộng sang thêm các nền tảng trong tương lai.
 
 | Nhóm | Nền tảng |
 |---|---|
@@ -218,9 +218,9 @@ Q-clock-AI có thể được chia thành các lớp sau:
 
 4. **Sandbox Executor**  
    Môi trường an toàn để chạy thử mã do AI tạo ra. Có thể sử dụng iframe sandbox, WebAssembly hoặc các runtime được cách ly.
-
 5. **Native Bridge**  
-   Cầu nối an toàn giữa tiện ích và hệ điều hành. Chỉ thực hiện các thao tác như tạo file, chạy file hoặc đặt lịch khi người dùng cho phép.
+
+   Cầu nối an toàn giữa tiện ích và hệ điều hành. Hiện tại là giao diện chuẩn hóa để gọi các thao tác hệ thống. Để hoạt động thực tế, cần cấu hình Chrome Native Messaging Host manifest trỏ đến một executable cục bộ. Chỉ thực hiện các thao tác như tạo file, chạy file hoặc đặt lịch khi người dùng cho phép.
 
 6. **UI Integration Layer**  
    Lớp giao diện được gắn trực tiếp vào website AI. Hiển thị nút bấm, bảng kết quả, trạng thái và các hành động nhanh.
@@ -403,7 +403,7 @@ Việc chạy mô hình cục bộ hoặc sandbox có thể tiêu tốn tài ngu
 
 ### Giai đoạn 2: Mở rộng sandbox
 
-- Hỗ trợ Python sandbox.
+- Hỗ trợ Python sandbox. (Kế hoạch phát triển)
 - Hiển thị log lỗi.
 - Gửi lỗi ngược lại AI.
 - Hỗ trợ xem trước HTML/CSS.
@@ -411,15 +411,15 @@ Việc chạy mô hình cục bộ hoặc sandbox có thể tiêu tốn tài ngu
 
 ### Giai đoạn 3: Tích hợp hệ điều hành
 
-- Tạo file qua native bridge.
-- Chạy file có xác nhận.
+- Tạo file qua native bridge. (Yêu cầu cấu hình Native Messaging Host)
+- Chạy file có xác nhận. (Yêu cầu cấu hình Native Messaging Host)
 - Đặt lịch tác vụ.
 - Quản lý thư mục dự án.
 - Ghi log hành động.
 
 ### Giai đoạn 4: Hệ sinh thái hoàn chỉnh
 
-- Hỗ trợ 40+ nền tảng AI.
+- Hỗ trợ mở rộng thêm nền tảng AI. (Hiện tại: 9 nền tảng)
 - Web IDE mini tích hợp trực tiếp.
 - Quản lý tác vụ tự động.
 - Đồng bộ cấu hình giữa các thiết bị.

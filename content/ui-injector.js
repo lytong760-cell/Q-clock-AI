@@ -57,7 +57,6 @@ const UIInjector = (() => {
       qworkButton.classList.toggle('qclock-qwork-active', qworkActive);
     }
     setQworkStatus(qworkActive ? 'active' : 'inactive');
-    AISignal.setQworkActive(qworkActive);
     if (qworkActive) {
       showNotification('Qwork mode activated');
       QworkDetector.activate(Content.getPlatformId());
@@ -290,8 +289,8 @@ const UIInjector = (() => {
 
   async function runSandbox(code) {
     setStatus('boosting');
-    AISignal.setBoostActive(true);
-    AISignal.setSandboxActive(true);
+    StateSignal.setBoostActive(true);
+    StateSignal.setSandboxActive(true);
     showOutput('Running...');
     try {
       const result = await Sandbox.runJs(code);
@@ -302,19 +301,19 @@ const UIInjector = (() => {
         }
         showOutput(output || '(No output)');
         setStatus('idle');
-        AISignal.setBoostActive(false);
-        AISignal.setSandboxActive(false);
+        StateSignal.setBoostActive(false);
+        StateSignal.setSandboxActive(false);
       } else {
         showOutput(`Error: ${result.error}`);
         setStatus('error');
-        AISignal.setBoostActive(false);
-        AISignal.setSandboxActive(false);
+        StateSignal.setBoostActive(false);
+        StateSignal.setSandboxActive(false);
       }
     } catch (e) {
       showOutput(`Sandbox error: ${e.message}`);
       setStatus('error');
-      AISignal.setBoostActive(false);
-      AISignal.setSandboxActive(false);
+      StateSignal.setBoostActive(false);
+      StateSignal.setSandboxActive(false);
     }
   }
 
@@ -330,13 +329,30 @@ const UIInjector = (() => {
   }
 
   function triggerBoost() {
+    if (!UIInjector.isQworkActive()) {
+      showNotification('Enable Qwork mode first');
+      return;
+    }
+    
+    const lastMessage = ReasoningBoost.findLastTruncatedMessage();
+    if (!lastMessage) {
+      showNotification('No truncated response found');
+      setStatus('idle');
+      return;
+    }
+    
     setStatus('boosting');
-    AISignal.setBoostActive(true);
-    showNotification('Reasoning boost activated');
+    StateSignal.setBoostActive(true);
+    showNotification('Requesting continuation...');
+    
+    const text = lastMessage.innerText || lastMessage.textContent || '';
+    const prompt = ReasoningBoost.buildContinuationPrompt(lastMessage, text, ReasoningBoost.generateContinuationId ? 'manual-' + Date.now() : 'manual');
+    ReasoningBoost.sendContinuation(prompt);
+    
     setTimeout(() => {
       setStatus('idle');
-      AISignal.setBoostActive(false);
-    }, 3000);
+      StateSignal.setBoostActive(false);
+    }, 5000);
   }
 
   function scheduleTask() {
