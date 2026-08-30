@@ -2,6 +2,8 @@ const UIInjector = (() => {
   let container = null;
   let statusIndicator = null;
   let mode = 'idle'; // idle | boosting | error | disabled
+  let qworkButton = null;
+  let qworkActive = false;
 
   function inject(platform) {
     remove();
@@ -11,12 +13,74 @@ const UIInjector = (() => {
     document.body.appendChild(container);
     attachEvents();
     setStatus('idle');
+    injectChatBarButton();
   }
 
   function remove() {
     const existing = document.getElementById('q-clock-ai-root');
     if (existing) existing.remove();
     container = null;
+    removeChatBarButton();
+  }
+
+  function injectChatBarButton() {
+    if (qworkButton) return;
+    const inputArea = PlatformDetector.findElement(Content.getPlatformId(), 'inputArea');
+    if (!inputArea) {
+      setTimeout(injectChatBarButton, 2000);
+      return;
+    }
+
+    qworkButton = document.createElement('button');
+    qworkButton.id = 'qclock-qwork-btn';
+    qworkButton.className = 'qclock-qwork-btn';
+    qworkButton.innerHTML = 'Qwork';
+    qworkButton.title = 'Toggle Q-clock Qwork Mode';
+    qworkButton.addEventListener('click', toggleQwork);
+
+    if (inputArea.parentNode) {
+      inputArea.parentNode.style.position = inputArea.parentNode.style.position || 'relative';
+      inputArea.parentNode.insertBefore(qworkButton, inputArea);
+    }
+  }
+
+  function removeChatBarButton() {
+    if (qworkButton && qworkButton.parentNode) {
+      qworkButton.parentNode.removeChild(qworkButton);
+    }
+    qworkButton = null;
+  }
+
+  function toggleQwork() {
+    qworkActive = !qworkActive;
+    if (qworkButton) {
+      qworkButton.classList.toggle('qclock-qwork-active', qworkActive);
+    }
+    setQworkStatus(qworkActive ? 'active' : 'inactive');
+    AISignal.setQworkActive(qworkActive);
+    if (qworkActive) {
+      showNotification('Qwork mode activated');
+      QworkDetector.activate(Content.getPlatformId());
+    } else {
+      showNotification('Qwork mode deactivated');
+      QworkDetector.deactivate();
+    }
+  }
+
+  function setQworkStatus(status) {
+    const existing = document.querySelector('.qclock-qwork-indicator');
+    if (existing) existing.remove();
+
+    if (status === 'active') {
+      const indicator = document.createElement('div');
+      indicator.className = 'qclock-qwork-indicator';
+      indicator.innerHTML = '<span class="qclock-qwork-dot"></span><span>Qwork Active</span>';
+      document.body.appendChild(indicator);
+    }
+  }
+
+  function isQworkActive() {
+    return qworkActive;
   }
 
   function buildHTML() {
@@ -226,6 +290,8 @@ const UIInjector = (() => {
 
   async function runSandbox(code) {
     setStatus('boosting');
+    AISignal.setBoostActive(true);
+    AISignal.setSandboxActive(true);
     showOutput('Running...');
     try {
       const result = await Sandbox.runJs(code);
@@ -236,13 +302,19 @@ const UIInjector = (() => {
         }
         showOutput(output || '(No output)');
         setStatus('idle');
+        AISignal.setBoostActive(false);
+        AISignal.setSandboxActive(false);
       } else {
         showOutput(`Error: ${result.error}`);
         setStatus('error');
+        AISignal.setBoostActive(false);
+        AISignal.setSandboxActive(false);
       }
     } catch (e) {
       showOutput(`Sandbox error: ${e.message}`);
       setStatus('error');
+      AISignal.setBoostActive(false);
+      AISignal.setSandboxActive(false);
     }
   }
 
@@ -259,9 +331,11 @@ const UIInjector = (() => {
 
   function triggerBoost() {
     setStatus('boosting');
+    AISignal.setBoostActive(true);
     showNotification('Reasoning boost activated');
     setTimeout(() => {
       setStatus('idle');
+      AISignal.setBoostActive(false);
     }, 3000);
   }
 
@@ -330,7 +404,7 @@ const UIInjector = (() => {
     setTimeout(() => notif.remove(), 3000);
   }
 
-  return { inject, remove, setStatus, injectCodeActions, showOutput, hideOutput };
+  return { inject, remove, setStatus, injectCodeActions, showOutput, hideOutput, injectChatBarButton, toggleQwork, isQworkActive, setQworkStatus, triggerBoost, runSandbox };
 })();
 
 if (typeof module !== 'undefined' && module.exports) {

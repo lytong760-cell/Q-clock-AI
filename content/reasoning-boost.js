@@ -36,7 +36,9 @@ const ReasoningBoost = (() => {
 
   function processResponse(messageElement) {
     if (!messageElement || processedTurns.has(messageElement)) return;
+    if (!UIInjector.isQworkActive()) return;
     processedTurns.add(messageElement);
+    AISignal.setStatus('processing');
 
     const text = messageElement.innerText || messageElement.textContent || '';
     if (text.length < 50) return;

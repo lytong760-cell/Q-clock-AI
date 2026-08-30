@@ -69,6 +69,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse(result);
         break;
       }
+      case 'QWORK_USAGE': {
+        console.log('[Q-clock-AI] Qwork usage detected:', message.payload);
+        sendResponse({ received: true });
+        break;
+      }
       default:
         sendResponse({ error: 'Unknown message type' });
     }

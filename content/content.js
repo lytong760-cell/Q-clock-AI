@@ -23,9 +23,17 @@ const Content = (() => {
     console.log(`[Q-clock-AI] Platform detected: ${platform.name}`);
     NativeBridge.init();
     ReasoningBoost.init(platform.id);
+    QworkDetector.init();
+    AISignal.init();
+    AISignal.observeForAI();
     UIInjector.inject(platform);
     observeChat();
     setupMessageListener();
+    QworkDetector.observeInputChanges();
+  }
+
+  function getPlatformId() {
+    return platform ? platform.id : null;
   }
 
   function observeChat() {
