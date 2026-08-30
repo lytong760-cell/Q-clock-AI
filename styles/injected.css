@@ -1,0 +1,316 @@
+#q-clock-ai-root {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  z-index: 999999;
+  pointer-events: none;
+}
+
+#qclock-panel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 320px;
+  max-height: 500px;
+  background: rgba(30, 30, 46, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  color: #e4e4e7;
+  overflow: hidden;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  pointer-events: auto;
+}
+
+#qclock-panel.qclock-hidden {
+  transform: translateY(20px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.qclock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.qclock-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #a78bfa;
+}
+
+.qclock-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.qclock-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.qclock-status-dot.qclock-idle {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+}
+
+.qclock-status-dot.qclock-boosting {
+  background: #a855f7;
+  box-shadow: 0 0 6px rgba(168, 85, 247, 0.5);
+  animation: qclock-pulse 1.5s infinite;
+}
+
+.qclock-status-dot.qclock-error {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+}
+
+.qclock-status-dot.qclock-disabled {
+  background: #6b7280;
+}
+
+.qclock-status-text {
+  color: #a1a1aa;
+}
+
+.qclock-actions {
+  display: flex;
+  gap: 6px;
+  padding: 12px 16px;
+  flex-wrap: wrap;
+}
+
+.qclock-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e4e4e7;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  pointer-events: auto;
+}
+
+.qclock-btn:hover {
+  background: rgba(167, 139, 250, 0.2);
+  border-color: rgba(167, 139, 250, 0.4);
+  transform: translateY(-1px);
+}
+
+.qclock-btn:active {
+  transform: translateY(0);
+}
+
+.qclock-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.qclock-boost-btn:hover {
+  background: rgba(168, 85, 247, 0.2);
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.qclock-run-btn:hover {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.qclock-save-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.qclock-schedule-btn:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.qclock-settings-btn:hover {
+  background: rgba(107, 114, 128, 0.2);
+  border-color: rgba(107, 114, 128, 0.4);
+}
+
+.qclock-output {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.qclock-output.qclock-hidden {
+  display: none;
+}
+
+.qclock-output-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 12px;
+  color: #a1a1aa;
+}
+
+.qclock-small-btn {
+  background: none;
+  border: none;
+  color: #a1a1aa;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.qclock-small-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#qclock-output-content {
+  margin: 0;
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #d4d4d8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 150px;
+  overflow: auto;
+}
+
+.qclock-status-bar {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(30, 30, 46, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  font-size: 12px;
+  color: #a1a1aa;
+  z-index: 999999;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  transition: opacity 0.3s ease;
+}
+
+.qclock-status-bar.qclock-hidden {
+  opacity: 0;
+}
+
+.qclock-status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  background: #22c55e;
+}
+
+.qclock-status-indicator.qclock-idle {
+  background: #22c55e;
+  box-shadow: 0 0 4px rgba(34, 197, 94, 0.5);
+}
+
+.qclock-status-indicator.qclock-boosting {
+  background: #a855f7;
+  box-shadow: 0 0 4px rgba(168, 85, 247, 0.5);
+  animation: qclock-pulse 1.5s infinite;
+}
+
+.qclock-status-indicator.qclock-error {
+  background: #ef4444;
+  box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
+}
+
+.qclock-status-indicator.qclock-disabled {
+  background: #6b7280;
+}
+
+#qclock-status-label {
+  font-weight: 500;
+}
+
+.qclock-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px 16px;
+  background: rgba(30, 30, 46, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #e4e4e7;
+  font-size: 13px;
+  z-index: 9999999;
+  animation: qclock-slide-in 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.qclock-code-actions {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0;
+  padding: 6px 8px;
+  background: rgba(30, 30, 46, 0.9);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.qclock-code-btn {
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #a1a1aa;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.qclock-code-btn:hover {
+  background: rgba(167, 139, 250, 0.2);
+  color: #fff;
+  border-color: rgba(167, 139, 250, 0.3);
+}
+
+@keyframes qclock-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes qclock-slide-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  #qclock-panel {
+    width: calc(100% - 40px);
+    max-width: 320px;
+    bottom: 80px;
+  }
+
+  .qclock-status-bar {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}

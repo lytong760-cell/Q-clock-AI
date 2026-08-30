@@ -162,18 +162,9 @@ Nếu là mã an toàn, hệ thống có thể chạy trong sandbox. Nếu cần
 
 Giao diện của Q-clock-AI phải được tích hợp trực tiếp trong khu vực chat của website AI. Không nên tạo ra một cửa sổ riêng quá lớn vì có thể làm gián đoạn trải nghiệm gốc.
 
-Các thành phần giao diện có thể bao gồm:
+CHọn CHế độ Qwork
 
-- Nút bật/tắt tăng tốc AI.
-- Nút mở rộng sandbox.
-- Nút chạy mã dưới mỗi khối mã.
-- Nút lưu file.
-- Nút tạo file.
-- Nút đặt lịch.
-- Bảng hiển thị kết quả chạy thử.
-- Bảng hiển thị log lỗi.
-- Trạng thái AI đang được tăng tốc.
-- Trạng thái sandbox đang hoạt động.
+
 
 ### 5.2. Hiển thị trực quan
 

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Q-clock-AI Settings</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f1a;
+      color: #e4e4e7;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 {
+      font-size: 24px;
+      color: #a78bfa;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: #71717a;
+      margin-bottom: 32px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #d4d4d8;
+      margin-bottom: 16px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      color: #a1a1aa;
+      margin-bottom: 6px;
+    }
+    input[type="text"], input[type="password"], select, textarea {
+      width: 100%;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      color: #e4e4e7;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: rgba(167, 139, 250, 0.5);
+    }
+    textarea {
+      min-height: 100px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+    }
+    .toggle-label {
+      font-size: 14px;
+      color: #d4d4d8;
+    }
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 11px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .toggle.active { background: #a855f7; }
+    .toggle-knob {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+    }
+    .toggle.active .toggle-knob { transform: translateX(18px); }
+    button[type="submit"] {
+      padding: 10px 20px;
+      background: #a855f7;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    button[type="submit"]:hover { background: #9333ea; }
+    .platform-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .platform-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .platform-item input {
+      width: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Q-clock-AI Settings</h1>
+  <p class="subtitle">Configure your AI reasoning booster and sandbox</p>
+
+  <div class="card">
+    <div class="card-title">General</div>
+    <div class="toggle-row">
+      <span class="toggle-label">Enable Extension</span>
+      <div class="toggle active" id="toggle-enabled"><div class="toggle-knob"></div></div>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">Reasoning Boost</span>
+      <div class="toggle active" id="toggle-boost"><div class="toggle-knob"></div></div>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">Sandbox Enabled</span>
+      <div class="toggle active" id="toggle-sandbox"><div class="toggle-knob"></div></div>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">Auto-run Safe Code</span>
+      <div class="toggle" id="toggle-autorun"><div class="toggle-knob"></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Native Bridge</div>
+    <div class="toggle-row">
+      <span class="toggle-label">Enable Native Bridge</span>
+      <div class="toggle" id="toggle-native"><div class="toggle-knob"></div></div>
+    </div>
+    <div class="form-group">
+      <label>Native Host Path</label>
+      <input type="text" id="native-host" placeholder="com.qclockai.native" disabled>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Supported Platforms</div>
+    <div class="platform-list">
+      <div class="platform-item"><input type="checkbox" id="plat-chatgpt" checked><label for="plat-chatgpt">ChatGPT</label></div>
+      <div class="platform-item"><input type="checkbox" id="plat-claude" checked><label for="plat-claude">Claude</label></div>
+      <div class="platform-item"><input type="checkbox" id="plat-gemini" checked><label for="plat-gemini">Gemini</label></div>
+      <div class="platform-item"><input type="checkbox" id="plat-copilot" checked><label for="plat-copilot">Copilot</label></div>
+      <div class="platform-item"><input type="checkbox" id="plat-perplexity" checked><label for="plat-perplexity">Perplexity</label></div>
+      <div class="platform-item"><input type="checkbox" id="plat-huggingchat"><label for="plat-huggingchat">HuggingChat</label></div>
+      <div class="platform-item"><input type="checkbox" id="plat-poe"><label for="plat-poe">Poe</label></div>
+      <div class="platform-item"><input type="checkbox" id="plat-openrouter"><label for="plat-openrouter">OpenRouter</label></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Safety</div>
+    <div class="form-group">
+      <label>Blocked Commands (one per line)</label>
+      <textarea id="blocked-commands" placeholder="rm -rf /&#10;format c:&#10;drop database">rm -rf /
+format c:
+drop database
+</textarea>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">Require confirmation for all actions</span>
+      <div class="toggle active" id="toggle-confirm"><div class="toggle-knob"></div></div>
+    </div>
+  </div>
+
+  <button type="submit" id="save-btn">Save Settings</button>
+
+  <script src="options.js"></script>
+</body>
+</html>
